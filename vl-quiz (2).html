@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VL Licensing Mock Exam</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #00a759;
+    --green-dark: #008a49;
+    --green-light: #e6f7ef;
+    --green-mid: #b3e8cf;
+    --cream: #fdf8f0;
+    --cream-dark: #f0e8d8;
+    --cream-border: #e0d0b8;
+    --text: #1a2e1e;
+    --muted: #6b8f74;
+    --correct: #00a759;
+    --wrong: #d94f3d;
+    --warning: #e0921a;
+    --white: #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--cream);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 60px;
+  }
+  .wrapper { width: 100%; max-width: 760px; }
+  header { text-align: center; padding: 36px 0 28px; }
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(22px, 5vw, 34px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  h1 span { color: var(--green); }
+  .subtitle { color: var(--muted); font-size: 14px; }
+  .shuffle-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--green-light);
+    border: 1px solid var(--green-mid);
+    color: var(--green-dark);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px 12px;
+    border-radius: 20px;
+    margin-top: 10px;
+  }
+  .score-tracker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    background: var(--white);
+    border: 1px solid var(--cream-border);
+    border-radius: 14px;
+    padding: 12px 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 12px rgba(0,167,89,0.08);
+  }
+  .score-item { text-align: center; }
+  .score-item .val {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px; font-weight: 800;
+    line-height: 1;
+  }
+  .score-item .lbl { font-size: 11px; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .score-divider { width: 1px; height: 36px; background: var(--cream-border); }
+  .val-correct { color: var(--correct); }
+  .val-wrong { color: var(--wrong); }
+  .val-pct { color: var(--green-dark); }
+    background: var(--white);
+    border: 1px solid var(--cream-border);
+    border-radius: 16px;
+    padding: 14px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 2px 12px rgba(0,167,89,0.08);
+  }
+  .progress-bar-bg {
+    flex: 1; height: 8px;
+    background: var(--cream-dark);
+    border-radius: 99px; overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green-dark), var(--green));
+    border-radius: 99px;
+    transition: width 0.4s cubic-bezier(.4,0,.2,1);
+  }
+  .progress-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px; font-weight: 700;
+    color: var(--green); white-space: nowrap;
+  }
+  .score-mini {
+    font-size: 12px; color: var(--muted);
+    white-space: nowrap;
+    background: var(--green-light);
+    padding: 3px 10px; border-radius: 20px;
+  }
+  .card {
+    background: var(--white);
+    border: 1px solid var(--cream-border);
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 12px rgba(0,167,89,0.08);
+    animation: slideIn 0.3s cubic-bezier(.4,0,.2,1);
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .q-number {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--green); margin-bottom: 10px;
+  }
+  .q-text { font-size: 15px; line-height: 1.7; color: var(--text); margin-bottom: 22px; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option-btn {
+    background: var(--cream);
+    border: 1.5px solid var(--cream-border);
+    border-radius: 12px;
+    padding: 13px 16px;
+    text-align: left;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    transition: all 0.18s ease;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    line-height: 1.5;
+  }
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--green);
+    background: var(--green-light);
+    transform: translateX(3px);
+  }
+  .option-btn:disabled { cursor: default; }
+  .option-letter {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 12px;
+    min-width: 24px; height: 24px;
+    border-radius: 6px;
+    background: var(--cream-dark);
+    color: var(--muted);
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.18s;
+    margin-top: 1px; flex-shrink: 0;
+  }
+  .option-btn:hover:not(:disabled) .option-letter { background: var(--green); color: #fff; }
+  .option-btn.correct { border-color: var(--correct); background: var(--green-light); }
+  .option-btn.correct .option-letter { background: var(--correct); color: #fff; }
+  .option-btn.wrong { border-color: var(--wrong); background: #fdf0ee; }
+  .option-btn.wrong .option-letter { background: var(--wrong); color: #fff; }
+  .explanation {
+    margin-top: 18px;
+    padding: 16px 18px;
+    background: var(--green-light);
+    border: 1px solid var(--green-mid);
+    border-left: 4px solid var(--green);
+    border-radius: 10px;
+    font-size: 14px; line-height: 1.75;
+    color: #1a3a25;
+    display: none;
+    animation: fadeIn 0.25s ease;
+  }
+  .explanation.show { display: block; }
+  .explanation strong { color: var(--green-dark); font-weight: 600; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .explanation-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--green); margin-bottom: 6px;
+  }
+  .result-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: 'Syne', sans-serif;
+    font-size: 12px; font-weight: 700;
+    padding: 4px 12px; border-radius: 20px;
+    margin-bottom: 14px;
+  }
+  .result-tag.correct-tag { background: var(--green-light); color: var(--green-dark); border: 1px solid var(--green-mid); }
+  .result-tag.wrong-tag { background: #fdf0ee; color: var(--wrong); border: 1px solid #f5c4be; }
+  .nav { display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }
+  .btn {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 13px;
+    padding: 11px 24px; border-radius: 10px;
+    border: none; cursor: pointer;
+    transition: all 0.18s; letter-spacing: 0.02em;
+  }
+  .btn-primary { background: var(--green); color: #fff; }
+  .btn-primary:hover { background: var(--green-dark); transform: translateY(-1px); }
+  .btn-ghost { background: var(--white); border: 1.5px solid var(--cream-border); color: var(--muted); }
+  .btn-ghost:hover { border-color: var(--green); color: var(--green); }
+  #results-screen { display: none; }
+  .results-card {
+    background: var(--white);
+    border: 1px solid var(--cream-border);
+    border-radius: 24px;
+    padding: 40px 32px;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(0,167,89,0.08);
+  }
+  .score-circle {
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    background: conic-gradient(var(--green) calc(var(--pct) * 1%), var(--cream-dark) 0);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 24px;
+  }
+  .score-circle-inner {
+    width: 110px; height: 110px;
+    background: var(--white); border-radius: 50%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  .score-pct { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; color: var(--green); }
+  .score-label { font-size: 11px; color: var(--muted); }
+  .results-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+  .results-sub { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+  .stats-row { display: flex; gap: 12px; justify-content: center; margin-bottom: 28px; flex-wrap: wrap; }
+  .stat-box { background: var(--cream); border: 1px solid var(--cream-border); border-radius: 12px; padding: 14px 20px; min-width: 90px; }
+  .stat-val { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; }
+  .stat-lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .correct-val { color: var(--correct); }
+  .wrong-val { color: var(--wrong); }
+  .missed-section { margin-top: 28px; text-align: left; }
+  .missed-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .missed-item { background: var(--cream); border: 1px solid var(--cream-border); border-left: 3px solid var(--wrong); border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; font-size: 13px; line-height: 1.6; }
+  .missed-item .mi-q { color: var(--muted); font-size: 11px; font-family: 'Syne', sans-serif; font-weight: 700; margin-bottom: 4px; }
+  .missed-item .mi-ans { color: var(--correct); font-weight: 600; }
+  @media (max-width: 500px) { .card { padding: 20px 16px; } .results-card { padding: 28px 18px; } }
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <header>
+    <h1>Variable Life <span>Mock Exam</span></h1>
+    <p class="subtitle">58 Questions &nbsp;·&nbsp; Shuffled every attempt</p>
+    <div class="shuffle-badge">🔀 Questions and choices shuffle every refresh</div>
+  </header>
+
+  <div id="quiz-screen">
+    <div class="score-tracker">
+      <div class="score-item">
+        <div class="val val-correct" id="rt-correct">0</div>
+        <div class="lbl">Correct</div>
+      </div>
+      <div class="score-divider"></div>
+      <div class="score-item">
+        <div class="val val-wrong" id="rt-wrong">0</div>
+        <div class="lbl">Wrong</div>
+      </div>
+      <div class="score-divider"></div>
+      <div class="score-item">
+        <div class="val val-pct" id="rt-pct">—</div>
+        <div class="lbl">Score %</div>
+      </div>
+      <div class="score-divider"></div>
+      <div class="score-item">
+        <div class="val" id="rt-remaining" style="color:var(--muted)">58</div>
+        <div class="lbl">Remaining</div>
+      </div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+      <span class="progress-text" id="progress-text">1 / 58</span>
+      <span class="score-mini" id="score-mini">✓ 0</span>
+    </div>
+    <div class="card">
+      <div class="q-number" id="q-number">Question 1</div>
+      <div id="result-tag-wrap"></div>
+      <div class="q-text" id="q-text"></div>
+      <div class="options" id="options"></div>
+      <div class="explanation" id="explanation">
+        <div class="explanation-label">💡 Explanation</div>
+        <div id="explanation-text"></div>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="btn btn-ghost" id="prev-btn" onclick="navigate(-1)">← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="navigate(1)">Next →</button>
+    </div>
+  </div>
+
+  <div id="results-screen">
+    <div class="results-card">
+      <div class="score-circle" id="score-circle">
+        <div class="score-circle-inner">
+          <div class="score-pct" id="final-pct">0%</div>
+          <div class="score-label">Score</div>
+        </div>
+      </div>
+      <div class="results-title" id="results-title">Quiz Complete!</div>
+      <div class="results-sub" id="results-sub"></div>
+      <div class="stats-row">
+        <div class="stat-box"><div class="stat-val correct-val" id="stat-correct">0</div><div class="stat-lbl">Correct</div></div>
+        <div class="stat-box"><div class="stat-val wrong-val" id="stat-wrong">0</div><div class="stat-lbl">Wrong</div></div>
+        <div class="stat-box"><div class="stat-val" id="stat-skipped" style="color:var(--warning)">0</div><div class="stat-lbl">Skipped</div></div>
+      </div>
+      <button class="btn btn-primary" onclick="restartQuiz()" style="margin-bottom:12px;width:100%">🔀 Shuffle & Retake</button>
+      <button class="btn btn-ghost" onclick="reviewMissed()" style="width:100%">Review Missed Questions</button>
+      <div class="missed-section" id="missed-section" style="display:none">
+        <div class="missed-title">Missed Questions</div>
+        <div id="missed-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const rawQuestions = [
+  { q: "Variable life insurance policy owners may make withdrawals in terms of ___.", opts: ["Number of units or fixed monetary amount through cancellation of units","Number of units of fixed monetary through reduction of the life cover sum assured","Fixed monetary amount only through reduction of the life cover sum assured","Number of units through cancellation of units"], ans: 3, exp: "Withdrawals from variable life policies are made by cancelling units — specifically, by the <strong>number of units</strong> through cancellation. There's no option to reduce the sum assured for withdrawals; you cancel actual fund units." },
+  { q: "Which of the following statements about flexibility features of variable life policies is FALSE?", opts: ["Policyholders may request for a partial withdrawal of the policy and the withdrawal amount will be met by cashing the units at the bid price.","Policyholders can take loans against their variable life up to the entire withdrawal value of their policies.","Policyholders have the flexibility of switching from one fund to another provided it satisfies the company's switching criteria.","Policyholders have the flexibility of increasing or decreasing their premiums for regular premium variable life policies."], ans: 1, exp: "Option B is FALSE. Policyholders <strong>cannot</strong> borrow the <em>entire</em> withdrawal value — loans are typically limited to a portion of it. The other statements are all true flexibility features of VL policies." },
+  { q: "The investment returns under variable life insurance policy ___.<br><br><span style='color:#6b8f74;font-size:13px'>I. Are not guaranteed<br>II. Are assured<br>III. Are linked to the performance of the investment fund managed by the life insurance company<br>IV. Fluctuate according to the rise and fall of market prices</span>", opts: ["I, II and III","I, II and IV","I, III and IV","II, III and IV"], ans: 2, exp: "Statements I, III, and IV are correct. VL returns are <strong>not guaranteed</strong> (I), are <strong>linked to fund performance</strong> (III), and <strong>fluctuate with market prices</strong> (IV). Statement II ('Are assured') is false — that contradicts the whole nature of variable life." },
+  { q: "Which of the following statements is TRUE?<br><br><span style='color:#6b8f74;font-size:13px'>I. The policy value of variable life policies is determined by the offer price at the time of valuation<br>II. The policy value of endowment policies is the cash value plus any accumulated dividends less any outstanding loans due at the time of surrender<br>III. The life company needs to maintain a separate account for variable life policies distinct from the general account</span>", opts: ["I & II","I, II & III","I & III","II & III"], ans: 3, exp: "Statements II and III are true. VL policy value uses the <strong>bid price</strong>, not offer price — so Statement I is false. Statement II correctly describes endowment policy value. Statement III is correct: insurers are required to keep VL funds in a <strong>separate account</strong> from the general fund." },
+  { q: "Which of the following statements about rebating and twisting is FALSE?", opts: ["Rebating is to offer a prospect a special inducement to purchase a policy","Twisting is a specific form of misrepresentation","Misrepresentation is a specific form of twisting","Switching is a facility allowing the policyholders to switch to another variable life funds offered by the company"], ans: 2, exp: "Option C is FALSE. It's the other way around — <strong>Twisting is a specific form of misrepresentation</strong>, not misrepresentation being a form of twisting. Twisting involves misleading a client to drop one policy and buy another." },
+  { q: "Which of the following statements about variable life policies is TRUE?<br><br><span style='color:#6b8f74;font-size:13px'>I. Offer price is used to determine the number of units to be credited to the account<br>II. The margin between the bid and offer price is used to cover the management cost of the policy<br>III. The policy value is calculated based on the bid price of units allocated into the policy</span>", opts: ["I, II & III","I & II","I & III","II & III"], ans: 3, exp: "Statements II and III are true. The <strong>bid-offer spread</strong> covers management costs (II). Policy value is calculated at the <strong>bid price</strong> (III). Statement I is false — units are credited using the <strong>offer price</strong> when buying." },
+  { q: "What is the most suitable investment instrument for an investor who is interested in protecting his principal and receiving a steady stream of income?", opts: ["Equities","Warrants","Variable life policies","Fixed income securities"], ans: 3, exp: "<strong>Fixed income securities</strong> (like bonds) are the answer. They protect principal and provide regular interest income. Equities are growth-oriented. Warrants are speculative. Variable life policies expose the investment portion to market risk." },
+  { q: "What are the disadvantages of investing in common shares?<br><br><span style='color:#6b8f74;font-size:13px'>I. Dividends are paid more than fixed rates<br>II. Investors are exposed to market and specific risks<br>III. Shares can become worthless if company becomes insolvent</span>", opts: ["I & II","I & III","II & III","I, II & III"], ans: 2, exp: "Statements II and III are disadvantages. Common shares expose investors to <strong>market and company-specific risks</strong> (II), and can become <strong>worthless</strong> during insolvency (III). Statement I is actually an advantage — common shares can pay higher dividends than fixed rates in good years." },
+  { q: "Which of the following statements about the difference between variable life policies and endowment policies are FALSE?<br><br><span style='color:#6b8f74;font-size:13px'>I. The policy values of variable life policies directly reflect the performance of the fund of the life company<br>II. The premiums and benefits of the endowment policies are described at the inception of the policy whereas variable life are flexible as they are account driven<br>III. The benefits and risks of variable life and endowment policies directly accrue to the policyholders</span>", opts: ["I & II","I, II & III","I & III","II & III"], ans: 3, exp: "Statements II and III are FALSE. Statement III is false because in <strong>endowment</strong> policies, benefits are guaranteed and risks are borne by the insurer, not the policyholder. In VL, risks accrue to the policyholder." },
+  { q: "Which of the following statements about twisting is FALSE?", opts: ["Twisting is a special form of misrepresentation","It refers to an agent inducing a policyholder to discontinue a policy with another company without disclosing the disadvantage of doing so","It includes misleading or incomplete comparison of policies","It refers to an agent offering a prospect a special inducement to purchase a policy"], ans: 3, exp: "Option D is FALSE — that definition describes <strong>rebating</strong>, not twisting. Twisting is specifically about convincing policyholders to lapse or switch policies through misrepresentation or incomplete comparison." },
+  { q: "Mr. Juan dela Cruz is 35 years old, earns Php 30,000/month, has moderate savings and moderate risk tolerance. What policy would you recommend?", opts: ["Participating Endowment","Variable life policies","Participating whole life","Annuities"], ans: 2, exp: "At 35 with moderate risk tolerance and stable income, <strong>Variable Life</strong> is suitable. It offers both insurance protection and investment growth potential — appropriate for someone who can tolerate some risk and has time to ride out market fluctuations." },
+  { q: "What are the benefits available when investing in variable life funds?<br><br><span style='color:#6b8f74;font-size:13px'>I. The variable life funds offer policyholders access to pooled or diversified portfolios<br>II. The variable life policyholders can vary his premium payments, take premium holidays, add single premium top-ups and change the level of the sum assured easily<br>III. The variable life policyholder can have access to a pool of qualified and trained professional fund managers</span>", opts: ["I & II","I & III","I, II & III","II & III"], ans: 0, exp: "Statements I and II are the core benefits highlighted here. Access to <strong>diversified portfolios</strong> (I) and <strong>premium flexibility</strong> (II) are key. The answer key marks A (I & II)." },
+  { q: "Rank the following in terms of their liquidity, from the least liquid to the most liquid:<br><br><span style='color:#6b8f74;font-size:13px'>I. Short term securities &nbsp; II. Property &nbsp; III. Cash &nbsp; IV. Equities</span>", opts: ["IV, II, III, I","III, I, IV, II","II, I, IV, III","II, IV, I, III"], ans: 2, exp: "From <strong>least to most liquid</strong>: Property (II) → Short-term securities (I) → Equities (IV) → Cash (III). Property is hardest to convert to cash quickly. Cash is the most liquid by definition." },
+  { q: "A unit trust is ___.", opts: ["Established by a trust deed which enables a trustee to hold the pool of money and assets in trust on behalf of the investor","A close-end fund and does not have to dispose off if the large number of investors sell their shares","One whereby the investor buys units in the trust itself and not share in the company","An organization registered under the SEC which usually invests in a wide range of equities and other investment"], ans: 0, exp: "A unit trust is <strong>established by a trust deed</strong>, with a trustee holding pooled assets on behalf of investors. It's an <strong>open-ended fund</strong> (not close-end)." },
+  { q: "Under variable life insurance policies ___.<br><br><span style='color:#6b8f74;font-size:13px'>I. There is no guaranteed minimum sum assured for the purpose of declaring dividends<br>II. There is no guaranteed minimum sum assured as a level of life insurance protection<br>III. Each of the policy owner's premium will be used to purchase units the number of which is dependent on the selling price of each unit<br>IV. Purchase of units can only be made from the variable life fund itself, which will then create new units and add investment monies to the value of the fund</span>", opts: ["I & IV","II & IV","III & IV","II & III"], ans: 2, exp: "Statements III and IV are correct. Premiums purchase units based on the <strong>selling (offer) price</strong> (III), and units are created from within the VL fund adding money to the fund value (IV)." },
+  { q: "The benefits of investing in variable life funds include ___.<br><br><span style='color:#6b8f74;font-size:13px'>I. Policy owners have access to pooled or diversified portfolios<br>II. Policy owners can easily change the level of the premium payments<br>III. Policy owners can gain access to variable life funds managed by professional investment managers with proven track records<br>IV. Policy owners can buy a variable life insurance policy only with a high initial investment</span>", opts: ["I, II & IV","I, III & IV","I, II & III","II, III & IV"], ans: 2, exp: "Statements I, II, and III are benefits. Statement IV is FALSE — VL policies do NOT require high initial investment; regular premium options are available." },
+  { q: "Which of the following BEST describes the policy benefits of variable life policies?", opts: ["The policy benefits are payable only on death or disability","The policy benefits will depend on the long-term performance of the life company","The policy benefits are directly linked to the investment performance of the underlying assets","The policy benefits are guaranteed"], ans: 2, exp: "Option C is correct. VL policy benefits are <strong>directly linked to the investment performance of underlying assets</strong>. They are NOT guaranteed (D is false)." },
+  { q: "Why is it important that the customer must understand the sales proposal in full?", opts: ["Because the insurer does not guarantee any return","Because the impact of changes in investment condition on variable life policy is borne solely by the customer","Because the agent may give the wrong recommendations","Because the policyholder expects higher returns"], ans: 1, exp: "Option B is the best answer. With VL, <strong>all investment risks are borne by the policyholder</strong>. If markets perform poorly, the customer absorbs the loss — not the insurer." },
+  { q: "Which of the following statements about rebating are TRUE?<br><br><span style='color:#6b8f74;font-size:13px'>I. Rebating is prohibited under the Insurance Code<br>II. Rebating deals with offering the prospect a special inducement to purchase a policy<br>III. Rebating will enhance the sales performance and uphold the prestige of an agent</span>", opts: ["I & II","I & III","II & III","All of the above"], ans: 0, exp: "Statements I and II are TRUE. Rebating IS prohibited (I), and it DOES involve offering special inducements (II). Statement III is FALSE — rebating <strong>violates professional ethics</strong> and can lead to license revocation." },
+  { q: "Which one of the following statements is FALSE?", opts: ["Variable life insurance policies offer investors policies with values and indirectly linked to the investment performance of the life company","Life company will carry out a valuation of its funds yearly and any surplus may be allocated to participating policyholder as cash dividends","Both Whole Life and Endowment policies can be used as an investment media with benefits that become payable at a future date","The investment element of Variable life policies varies according to underlying assets of the portfolio"], ans: 0, exp: "Option A is FALSE. VL policy values are <strong>directly</strong> linked to investment performance — not indirectly. The word 'indirectly' makes this statement wrong." },
+  { q: "Which of the following statements about option top-up under variable life insurance is false?", opts: ["Policy owners may buy additional units of the variable life fund and these units will be allocated to new variable life insurance policies","Further premiums at time of the top-up will be used in full, after deducting charges for top-ups, to purchase additional units of the variable life funds","Top-up policy, the policy owner pays further single premium at the time of the top-up","Policy owners are normally allowed to top-up their policies at any time, subject to a minimum amount"], ans: 0, exp: "Option A is FALSE. When you top-up a VL policy, the additional units are allocated to the <strong>same existing policy</strong> — not new separate policies." },
+  { q: "The characteristics of a variable life insurance include ___.<br><br><span style='color:#6b8f74;font-size:13px'>I. Its withdrawal value and protection benefits are determined by the investment performance of the underlying assets<br>II. Its protection costs are generally met by implicit charges<br>III. Its commission and company expenses are met by a variety of explicit charges with normally 6 months notice given by the life companies prior to any change<br>IV. Its withdrawal value is normally the value of units allocated to the policy owner calculated at the bid price</span>", opts: ["I, II & III","II, III & IV","I, II & IV","I, III & IV"], ans: 3, exp: "Statements I, III, and IV are correct. Statement II is FALSE — protection costs in VL are met by <strong>explicit charges</strong> (cancellation of units), not implicit ones." },
+  { q: "Which of the following statements about single premium variable life policies are TRUE?<br><br><span style='color:#6b8f74;font-size:13px'>I. There is no fixed term in a single premium variable life policy and therefore, they are technically whole life insurance<br>II. Top-ups or single premium injections are allowed in these plans<br>III. Policyholders have the flexibility of varying the level cover</span>", opts: ["I, II & III","II & III","I & II","I & III"], ans: 2, exp: "Statements I and II are TRUE. Single premium VL has no fixed term (whole life, I) and allows top-ups (II). Statement III is false — the level of cover in single premium plans is typically fixed at inception." },
+  { q: "Investing in bonds offers the following EXCEPT:", opts: ["Must be issued with a minimum death benefit","Must be issued with a maximum withdrawal value","It allows the investor a chance for capital preservation","It enables the investor an opportunity for capital appreciation"], ans: 3, exp: "Option D is the EXCEPT. Bonds are primarily for <strong>capital preservation and steady income</strong> — not capital appreciation. That's the domain of equities." },
+  { q: "Which of the following statements about variable life policies are TRUE?<br><br><span style='color:#6b8f74;font-size:13px'>I. The withdrawal value is not guaranteed<br>II. The volatility of the returns depends on the investment strategy of the fund<br>III. The variable life policyholder has direct control over the investment decisions of the variable life fund</span>", opts: ["I, II & III","I & II","I & III","II & III"], ans: 1, exp: "Statements I and II are TRUE. Withdrawal value is <strong>not guaranteed</strong> (I), and volatility depends on <strong>fund strategy</strong> (II). Statement III is FALSE — policyholders choose which fund, but do NOT control day-to-day investment decisions." },
+  { q: "Single premium variable life insurance policy:", opts: ["Must be issued with a minimum death benefit","Must be issued with a maximum withdrawal value","Has no death benefit","Has no withdrawal value"], ans: 0, exp: "A single premium VL policy <strong>must be issued with a minimum death benefit</strong>. This is a regulatory requirement — insurance must have a minimum life cover." },
+  { q: "Which of the following statements about characteristics of variable life policies are TRUE?<br><br><span style='color:#6b8f74;font-size:13px'>I. Variable policies generally have a longer exposure to equity investment than with participating and other traditional policies<br>II. The protection costs are generally met by implicit charges, which vary with age and level of cover<br>III. The commissions and company expenses are met by a variety of explicit charges, some of which are variable</span>", opts: ["I, II, III","I & II","II & III","I & III"], ans: 3, exp: "Statements I and III are TRUE. VL has longer equity exposure (I) and expenses are met through explicit charges (III). Statement II is FALSE — protection costs in VL are met through <strong>explicit charges</strong>, not implicit charges." },
+  { q: "Which of the following statements about benefits in variable life fund is FALSE?", opts: ["The fund provides a highly diversified portfolio, thus, lowering the risk of investment","The fund ensures definite high yield for an investor since it is managed by professionals who are well-versed in the management of risk of investment portfolios","The fund relieves the investor from the hassle of administering his/her investment","The fund enables small investors to participate in a pool of diversified portfolio in which he/she, with a low investment capital, is likely to have acceded to"], ans: 1, exp: "Option B is FALSE. Professional management does NOT guarantee high yields. <strong>No one can guarantee returns</strong> in a variable product — that's the fundamental nature of VL." },
+  { q: "The flexibility benefit of investing in variable life funds include ___.<br><br><span style='color:#6b8f74;font-size:13px'>I. Policy owners can easily change the level of sum assured and switch their investment between funds<br>II. Policy owners can easily take premium holidays and add single premium to Top-ups<br>III. Variable life insurance policies offer the potential for higher returns<br>IV. Traditional participating policies aim to produce a steady return by smoothing out market fluctuation</span>", opts: ["All of the above","I, II & III","I, II & IV","I, III & IV"], ans: 1, exp: "Statements I, II, and III are flexibility benefits of VL. Statement IV describes traditional participating policies — not a benefit of VL." },
+  { q: "The fundamental differences between traditional participating and variable life insurance policies include ___.<br><br><span style='color:#6b8f74;font-size:13px'>I. Variable life insurance policies are less likely to offer more choices in terms of investment funds<br>II. The investment elements of VL policies is made known to the policy owner at the outset and is invested in a separately identifiable fund made up of units of investment<br>III. Variable life insurance policies offer the potential for higher returns<br>IV. Traditional participating policies aim to produce a steady return by smoothing out market fluctuation</span>", opts: ["I, III & IV","II, III, IV","I, II, III","I, II & IV"], ans: 1, exp: "Statements II, III, and IV are correct differences. Statement I is FALSE — VL actually offers <strong>MORE</strong> investment fund choices, not fewer." },
+  { q: "The switching facility under variable life insurance policies is a very useful ___ .", opts: ["For the purpose of profit planning by the life policies","For the purpose of assets planning by the trustee","For the purpose of sales planning by the fund managers","For the purpose of financial planning by the policy owners"], ans: 3, exp: "Switching funds is a tool for <strong>financial planning by the policy owners</strong>. It lets them adjust their risk exposure as life circumstances change — e.g., shifting from equity to bond funds as they near retirement." },
+  { q: "The following statements about surrender value under traditional participating life insurance products are TRUE?", opts: ["Cash value is paid when yearly renewable term insurance policy is surrendered","When a participating insurance policy is surrendered, the surrender value is calculated by multiplying the bid price with the number of units","The amount of surrender value is usually higher than the amount under non-participating policies and it varies with the age of the assured, being lower at older ages","In the case of participating policies, the net cash surrender value includes the surrender value of the paid-up addition up to the date of surrender"], ans: 2, exp: "Option C is TRUE. Participating policies generally have <strong>higher surrender values</strong> than non-participating, and the value varies with age. Option A is false (term policies typically have no cash value). Option B describes VL policies, not traditional par policies." },
+  { q: "Which one of the following statements about risks of investing in variable life funds is TRUE?", opts: ["Policy owners who are risk averse should buy life insurance policies with high equity investment","Investment in variable life funds which are fully invested in units of equity bonds are not suitable for policy owners who can tolerate the risks of short term fluctuation in their cash value","Policy owners who invest in variable life funds with high equity investment face higher risk but can expect to achieve higher return than the traditional life insurance product over the long term","Policy owners who are risk averse should not purchase life insurance policies with high protection and guaranteed cash and maturity values"], ans: 2, exp: "Option C is TRUE — the classic risk-return tradeoff. High equity = higher risk + higher potential long-term return. Option A is wrong (risk-averse people should avoid high equity). Option D is wrong (guaranteed values are exactly what risk-averse people should want)." },
+  { q: "What should be the withdrawal values after a year?<br><br><span style='color:#6b8f74;font-size:13px'>Offer Price = Php 16.00 | Bid-Offer Spread = 4.5% | Units bought = 25,000 | Policy Fee = 1,800 | Admin & Mortality = 8,750 | Top-up Fee = 700 | Admin for Top-up = 2,000 | Growth = 8%</span>", opts: ["Php 432,000.00","Php 420,069.20","Php 401,107.58","Php 412,500.00"], ans: 2, exp: "Bid price = 16 × 0.955 = 15.28. Value = 25,000 × 15.28 = 382,000. Deduct fees (13,250). Net = 368,750. Apply 8% growth = 368,750 × 1.08 ≈ <strong>Php 398,250</strong>. Closest per answer key: C (Php 401,107.58). Exact result depends on order of fee deduction — follow your reviewer's method." },
+  { q: "The protection cost under a variable life insurance policy ___.<br><br><span style='color:#6b8f74;font-size:13px'>I. Are met by flat initial charges for regular premium plans<br>II. Are generally covered by cancellation of units in the fund<br>III. Are generally met by explicit charges stipulated openly in the policy terms<br>IV. Vary with age of policy owner and level of cover</span>", opts: ["I, II, & III","I, II, & IV","I, III & IV","II, III, & IV"], ans: 3, exp: "Statements II, III, and IV are correct. Protection costs are covered by <strong>cancellation of units</strong> (II), through <strong>explicit charges</strong> in policy documents (III), and they <strong>vary with age and cover level</strong> (IV). Statement I is false — they're not flat." },
+  { q: "Which of the following statements about diversification in portfolio management is FALSE?", opts: ["A diversified portfolio provides greater security to an investor having to sacrifice return for the portfolio","Diversification can completely eliminate the risk of investing in stocks in a portfolio","Diversification can involve purchasing different types of stocks and investing stocks in different countries","Diversification helps to spread the portfolio risk by investing in different categories of investment in a portfolio"], ans: 1, exp: "Option B is FALSE. Diversification <strong>reduces</strong> unsystematic risk but <strong>cannot completely eliminate</strong> systematic (market) risk." },
+  { q: "What are the advantages of investing in preferred shares?<br><br><span style='color:#6b8f74;font-size:13px'>I. It gives shareholders the right to a fixed dividend<br>II. Has the priority over company assets during a dissolution<br>III. They enjoy benefit of capital appreciation</span>", opts: ["I, II, & III","I & II","I & III","II & III"], ans: 0, exp: "All three are advantages: fixed dividends (I), priority claim on assets during dissolution (II), and potential for capital appreciation (III)." },
+  { q: "With traditional participating life insurance products, the allocations to policy owners in the form of dividends ___.<br><br><span style='color:#6b8f74;font-size:13px'>I. Are not directly linked to the company's investment performance<br>II. Have already been smoothed by the life company<br>III. Do not have the highs and lows of investment return as in good investment years of the life company<br>IV. Are not fixed at the inception of the policy, but are greatly dependent on the investment performance of the company</span>", opts: ["I, II, & III","I, II & IV","I, III, & IV","II, III, & IV"], ans: 0, exp: "Statements I, II, and III describe traditional par policy dividends correctly. They are smoothed (II), don't reflect extreme highs/lows (III), and aren't directly tied to investment performance (I)." },
+  { q: "The objective of satisfying customers need profitably can be achieved by an agent through ___.<br><br><span style='color:#6b8f74;font-size:13px'>I. The giving of freebies to the customers<br>II. Extensive investment training by the company<br>III. The use of sales plan, where sales goals, strategies, and objectives are coordinated with market analysis, segmentation and training<br>IV. The giving of monetary assistance and discount to the customers</span>", opts: ["I & III","II & III","II & IV","II, III & IV"], ans: 1, exp: "Statements II and III are the right approaches. Proper <strong>investment training</strong> (II) and a structured <strong>sales plan</strong> (III) help agents serve clients profitably and ethically. Freebies (I) and discounts (IV) are forms of rebating — prohibited." },
+  { q: "Which of the statements is true about CASH?", opts: ["It has a high yield potential","Amount invested in cash depends on size of the cash flow requirement","Investment in cash increases when there is a bull run in the stock market","Investment in cash decreases when interest rates rise"], ans: 1, exp: "Option B is TRUE. The amount held in cash instruments depends on your <strong>cash flow needs</strong>. Cash has LOW yield potential (A is false). During a bull market, investors move OUT of cash into stocks (C is false). When interest rates rise, cash returns actually IMPROVE (D is false)." },
+  { q: "Under a regular premium variable whole life plan ___.<br><br><span style='color:#6b8f74;font-size:13px'>I. Premium top-ups and holidays, subject to the company's administrative rules are usually allowed<br>II. Life protection is the main objective of the plan with investment as the nominal purpose<br>III. Withdrawals after the payment of a few years premium are usually allowed<br>IV. A single premium contribution is made to the policy which uses the premium to purchase units in a variable life fund to provide a certain level of life cover</span>", opts: ["II, III & IV","I, III & IV","I, II & IV","I, II & III"], ans: 3, exp: "Statements I, II, and III apply to regular premium VL whole life plans. Statement IV describes a <strong>single premium</strong> plan — a different product type." },
+  { q: "Which of the following statements about investment objectives is false?", opts: ["People invest money in fixed deposits to produce high and guaranteed returns","People invest money to enhance a comfortable standard of living","People invest money to provide funds for higher education for their children","Investment in commodities has no regular income"], ans: 0, exp: "Option A is FALSE. Fixed deposits offer <strong>guaranteed but low</strong> returns — not high returns. They're chosen for safety, not high yield." },
+  { q: "Which of the following is/are the main characteristic(s) of variable life policies?<br><br><span style='color:#6b8f74;font-size:13px'>I. The policies can be used for investment, as a source of regular savings and protection<br>II. The withdrawal values and protection benefits are determined by the investment<br>III. The net cash values of the policies are the gross cash values shown in the policy that includes dividends up to the date of surrender less indebtedness including interest</span>", opts: ["II","I","I, II & III","I & II"], ans: 3, exp: "Statements I and II are correct main characteristics of VL policies. Statement III describes <strong>traditional participating policies</strong>, not VL." },
+  { q: "Risk can be classified into two particular categories in relation to investment. They include ___.<br><br><span style='color:#6b8f74;font-size:13px'>I. The risk of not losing some or all of the person's initial investment<br>II. The risk of rate of return on the investment not matching up to the individual's expectation<br>III. The risk of rate of return on the investment matching up to the individual's expectation<br>IV. The risk of losing some or all of a person's initial investment</span>", opts: ["I & III","I & II","III & IV","II & IV"], ans: 3, exp: "The two real investment risk categories are: risk of <strong>losing capital</strong> (IV) and risk of <strong>returns not meeting expectations</strong> (II). Statements I and III are the positive scenarios — not risks." },
+  { q: "The duties of the trustee of unit trust do not include:", opts: ["Managing the portfolio of investment and administering the buying and selling of shares in the unit trust itself","Ensuring that the fund manager adhere to the provision of the trust deeds","Acting generally to protect the unit-holders","Holding the pool of money and assets in trust in behalf of the investors"], ans: 0, exp: "Option A describes what the <strong>fund manager</strong> does, not the trustee. The trustee oversees and protects investors — ensuring compliance with trust deeds (B), protecting unit-holders (C), and holding assets in trust (D)." },
+  { q: "Policy fee payable by variable life insurance policy owner is to cover ___.", opts: ["The handling charges by professional investment managers","The price of each unit bought under the variable life insurance policy","The mortality costs of the variable life insurance policy","The administrative expenses of setting up the variable life insurance policy"], ans: 3, exp: "The policy fee covers the <strong>administrative expenses</strong> of setting up and maintaining the policy. Mortality costs are covered separately through unit cancellation." },
+  { q: "The selling price under a variable life insurance policy is:", opts: ["The price at which units under the policy are bought back by the life insurance company","The price at which units under the policy are offered for sale by the life insurance company","Also known as the bid price","A fixed amount throughout the life of the policy"], ans: 1, exp: "The <strong>selling (offer) price</strong> is the price at which the life company sells units to the policyholder. The bid price is what the company pays when buying units back." },
+  { q: "Diversification in investment involves ___.", opts: ["Putting all the funds under management into one category of investment","Spreading the risk of investment by not putting the fund into several categories of investment","Reducing the risks of investment by putting one fund under management into several categories of investment","Reducing the risks of investment by putting all one's eggs in one basket"], ans: 2, exp: "Diversification means <strong>spreading one fund across several categories</strong> of investment to reduce risk. The classic opposite is 'putting all eggs in one basket' (D — what you DON'T do)." },
+  { q: "Equity funds ___.", opts: ["Invest in shares of stocks and the magnitude of the change in unit prices will only depend on the quantity of the equities held","Invest in shares of stocks and during market recession, such assets are usually the last to depreciate","Invest in shares of stocks which are inherently of lower risk in nature and the prices of stocks are stable","Invest in shares of stocks and investors who buy such assets usually aim for capital appreciation"], ans: 3, exp: "Option D is correct. Equity funds invest in stocks and the primary goal is <strong>capital appreciation</strong> (growth). Stocks are NOT low risk (C is false). During recession, equities often decline first (B is false)." },
+  { q: "Which of the following statements describe the differences between variable life products and participating products?<br><br><span style='color:#6b8f74;font-size:13px'>I. Variable life products allow policyholders to vary the premium payments unlike participating products<br>II. Variable life products can take the form of whole life or endowment policies with Participating products<br>III. Variable life products allow policyholders to pay future single premiums from time to time to add more units unlike participating products</span>", opts: ["I, II, and III","I","I and III","II and III"], ans: 0, exp: "All three statements correctly describe differences. VL allows premium flexibility (I), can mirror whole life/endowment structures (II), and allows top-ups that add units (III)." },
+  { q: "How much will the policyholder lose if he surrenders the policy now?<br><br><span style='color:#6b8f74;font-size:13px'>Bid price = Ps. 13.00 | Bid-offer spread = 4% | Single premium = Ps. 450,000 | Policy fee = Ps. 1,800 | Admin & Mortality = 3%</span>", opts: ["Ps. 43,400.90","Ps. 33,246.78","Ps. 22,500.00","Ps. 15,299.96"], ans: 1, exp: "Offer price = 13 / 0.96 = 13.5417. Units = 450,000 / 13.5417 ≈ 33,229. Withdrawal value = 33,229 × 13 = 432,977. Deduct policy fee: − 1,800 = 431,177. Deduct admin/mortality (3%): × 0.97 = 418,242. Loss = 450,000 − 418,242 ≈ <strong>Ps. 31,758</strong>. Closest to B (Ps. 33,246.78) per the answer key." },
+  { q: "Which of the following statements BEST describes 'variable life' policies?", opts: ["It is a fixed premium policy with returns that will not vary with the underlying value of investments","It is a fixed premium policy with returns that will vary with the underlying value of investments","It is a flexible premium policy with returns that will not vary with the underlying value of investments","It is a flexible premium policy with returns that will vary with the underlying value of investments"], ans: 3, exp: "Option D is the best description. Variable life is a <strong>flexible premium</strong> policy with <strong>returns that vary</strong> with underlying investment performance. This is the core definition of VL." },
+  { q: "Which of the following factors contribute to the specific risk of an investment?<br><br><span style='color:#6b8f74;font-size:13px'>I. Rate of corporate taxes<br>II. Fraud by senior management<br>III. Financial leverage of the company</span>", opts: ["I and II","II and III","I and III","I, II and III"], ans: 1, exp: "Specific (unsystematic) risk is company-specific. <strong>Fraud by senior management</strong> (II) and <strong>financial leverage</strong> (III) are company-specific factors. Corporate tax rates (I) are systemic/market-wide — systematic risk." },
+  { q: "Investing in bonds offers the following advantages EXCEPT:", opts: ["It offers protection to the principal and guaranteed steady stream of income","It is a place of temporary refuge when the investor foresees that the market outlook is uncertain","It allows the investor a chance for capital preservation","It enables the investor an opportunity for capital appreciation"], ans: 3, exp: "Bonds do NOT offer significant capital appreciation — that's equities. Bonds offer principal protection (A), safe haven during uncertainty (B), and capital preservation (C)." },
+  { q: "Rank the following investment instruments in terms of their level of risks, from the least risky to the most risky.<br><br><span style='color:#6b8f74;font-size:13px'>I. Cash and deposit &nbsp; II. Derivatives &nbsp; III. A well diversified investment portfolio &nbsp; IV. Stock options</span>", opts: ["I, IV, III & II","I, III, IV & II","I, IV, II & III","I, II, III & IV"], ans: 0, exp: "From <strong>least to most risky</strong>: Cash (I) → Stock options (IV) → Diversified portfolio (III) → Derivatives (II). Derivatives are the most complex and risky instruments." },
+  { q: "In risk-return profile of cash funds, bond funds, balanced funds, managed funds and equity funds, a risk-return graph will show that ___.<br><br><span style='color:#6b8f74;font-size:13px'>I. Higher return normally comes with lower risk<br>II. Higher return normally comes with higher risk<br>III. At the top end of the graph are the equity funds<br>IV. The relatively risk-less cash funds sit at the bottom end of the graph</span>", opts: ["I, II & III","II, III & IV","I, II & IV","I, III & IV"], ans: 1, exp: "Statements II, III, and IV are correct. <strong>Higher risk = higher return potential</strong> (II). Equity funds at the top (III). Cash funds at the bottom (IV). Statement I is the opposite of reality." },
+  { q: "Which of the following statements are TRUE?<br><br><span style='color:#6b8f74;font-size:13px'>I. The policy value of variable life policies is determined by the offer price at the time of valuation<br>II. The policy value of endowment policies is the cash value plus any accumulated dividends less any outstanding loans due at the time of surrender<br>III. The life company needs to maintain a separate account for variable life policies distinct from the general account</span>", opts: ["I & II","I, II & III","I & III","II & III"], ans: 3, exp: "Statements II and III are TRUE. Endowment policy value = cash value + dividends − loans (II ✓). Life companies must maintain a <strong>separate account</strong> for VL (III ✓). Statement I is FALSE — VL policy value uses the <strong>bid price</strong>, not offer price." },
+  { q: "Which of the following information is NOT required to be disclosed to policyholders of variable life policies?", opts: ["The net withdrawal value as of the statement date","The premiums received and charges levied during the period","The basis and frequency for valuing the assets","Number and value of units held at the beginning of the period; bought and sold during the period; and held at the end of the period"], ans: 0, exp: "Option A — the <strong>net withdrawal value</strong> — is NOT required to be disclosed in the periodic statement. Required disclosures include premiums and charges (B), basis for valuation (C), and unit movement details (D)." }
+];
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function buildQuestions() {
+  return shuffle(rawQuestions).map(q => {
+    const indices = shuffle([0,1,2,3]);
+    const newOpts = indices.map(i => q.opts[i]);
+    const newAns = indices.indexOf(q.ans);
+    return { ...q, opts: newOpts, ans: newAns };
+  });
+}
+
+let questions = buildQuestions();
+let current = 0;
+let answers = new Array(questions.length).fill(null);
+let score = 0;
+
+function renderQuestion(idx) {
+  const q = questions[idx];
+  document.getElementById('q-number').textContent = `Question ${idx + 1} of ${questions.length}`;
+  document.getElementById('q-text').innerHTML = q.q;
+
+  const rtw = document.getElementById('result-tag-wrap');
+  if (answers[idx] !== null) {
+    const correct = answers[idx] === q.ans;
+    rtw.innerHTML = correct
+      ? `<div class="result-tag correct-tag">✓ Correct!</div>`
+      : `<div class="result-tag wrong-tag">✗ Incorrect — Correct answer: ${['A','B','C','D'][q.ans]}</div>`;
+  } else { rtw.innerHTML = ''; }
+
+  const optDiv = document.getElementById('options');
+  optDiv.innerHTML = '';
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="option-letter">${['A','B','C','D'][i]}</span><span>${opt}</span>`;
+    if (answers[idx] !== null) {
+      btn.disabled = true;
+      if (i === q.ans) btn.classList.add('correct');
+      else if (i === answers[idx]) btn.classList.add('wrong');
+    } else { btn.onclick = () => selectAnswer(i); }
+    optDiv.appendChild(btn);
+  });
+
+  document.getElementById('explanation-text').innerHTML = q.exp;
+  document.getElementById('explanation').classList.toggle('show', answers[idx] !== null);
+
+  const done = answers.filter(a => a !== null).length;
+  const wrongCount = answers.filter((a, i) => a !== null && a !== questions[i].ans).length;
+  const remaining = questions.length - done;
+  document.getElementById('progress-fill').style.width = ((done / questions.length) * 100) + '%';
+  document.getElementById('progress-text').textContent = `${idx + 1} / ${questions.length}`;
+  document.getElementById('score-mini').textContent = `✓ ${score}`;
+  document.getElementById('rt-correct').textContent = score;
+  document.getElementById('rt-wrong').textContent = wrongCount;
+  document.getElementById('rt-pct').textContent = done > 0 ? Math.round((score / done) * 100) + '%' : '—';
+  document.getElementById('rt-remaining').textContent = remaining;
+
+  document.getElementById('prev-btn').style.display = idx === 0 ? 'none' : 'block';
+  const nextBtn = document.getElementById('next-btn');
+  if (idx === questions.length - 1) {
+    nextBtn.textContent = 'Finish →';
+    nextBtn.onclick = showResults;
+  } else {
+    nextBtn.textContent = 'Next →';
+    nextBtn.onclick = () => navigate(1);
+  }
+}
+
+function selectAnswer(i) {
+  if (answers[current] !== null) return;
+  answers[current] = i;
+  if (i === questions[current].ans) score++;
+  renderQuestion(current);
+}
+
+function navigate(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= questions.length) return;
+  current = next;
+  renderQuestion(current);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showResults() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('results-screen').style.display = 'block';
+  const correct = score;
+  const wrong = answers.filter((a, i) => a !== null && a !== questions[i].ans).length;
+  const skipped = answers.filter(a => a === null).length;
+  const pct = Math.round((correct / questions.length) * 100);
+  document.getElementById('score-circle').style.setProperty('--pct', pct);
+  document.getElementById('final-pct').textContent = pct + '%';
+  document.getElementById('stat-correct').textContent = correct;
+  document.getElementById('stat-wrong').textContent = wrong;
+  document.getElementById('stat-skipped').textContent = skipped;
+  let title, sub;
+  if (pct >= 80) { title = 'You passed! 🎉'; sub = "Great work. You know your VL material well."; }
+  else if (pct >= 60) { title = 'Almost there.'; sub = "Review the missed items and try again."; }
+  else { title = 'Keep studying.'; sub = "Go through the explanations carefully and retake."; }
+  document.getElementById('results-title').textContent = title;
+  document.getElementById('results-sub').textContent = sub;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function reviewMissed() {
+  const section = document.getElementById('missed-section');
+  const list = document.getElementById('missed-list');
+  if (section.style.display === 'block') { section.style.display = 'none'; return; }
+  list.innerHTML = '';
+  questions.forEach((q, i) => {
+    if (answers[i] !== null && answers[i] !== q.ans) {
+      const div = document.createElement('div');
+      div.className = 'missed-item';
+      const qtext = q.q.replace(/<br>.*$/s,'').replace(/<[^>]+>/g,'');
+      div.innerHTML = `
+        <div class="mi-q">Q${i+1}</div>
+        <div style="margin-bottom:6px">${qtext.substring(0,80)}...</div>
+        <div>Your answer: <span style="color:var(--wrong)">${['A','B','C','D'][answers[i]]}. ${q.opts[answers[i]]}</span></div>
+        <div>Correct: <span class="mi-ans">${['A','B','C','D'][q.ans]}. ${q.opts[q.ans]}</span></div>
+      `;
+      list.appendChild(div);
+    }
+  });
+  if (!list.innerHTML) list.innerHTML = '<div style="color:var(--correct);font-size:14px;padding:8px">No missed questions on answered items!</div>';
+  section.style.display = 'block';
+}
+
+function restartQuiz() {
+  questions = buildQuestions();
+  answers = new Array(questions.length).fill(null);
+  score = 0; current = 0;
+  document.getElementById('missed-section').style.display = 'none';
+  document.getElementById('results-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  renderQuestion(0);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+renderQuestion(0);
+</script>
+</body>
+</html>
